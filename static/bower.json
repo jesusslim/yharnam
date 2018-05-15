@@ -1,0 +1,28 @@
+{
+  "name": "Yharnam",
+  "description": "Yharnam demo",
+  "authors": [
+    "Jesusslim"
+  ],
+  "main": "index.html",
+  "moduleType": [
+    "globals"
+  ],
+  "license": "ALv2",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "adapter.js": "v0.2.9",
+    "bootstrap": "~3.3.0",
+    "draggabilly": "~1.2.4",
+    "demo-console": "1.5.1",
+    "ekko-lightbox": "~3.3.0",
+    "kurento-utils": "6.6.2"
+  }
+}

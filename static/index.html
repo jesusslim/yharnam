@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Yharnam">
+    <meta name="author" content="Jesusslim">
+    <meta http-equiv="cache-control" content="no-cache">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Yharnam</title>
+
+    <style type="text/css">
+        .video_box {
+            height:170px;
+            margin-top: 2px;
+            margin-bottom: 2px;
+            background: #f0f0f0;
+            position:relative;
+        }
+        .input{
+            width: 50px;
+        }
+        .video{
+            max-width: 250px;
+            min-width: 250px;
+        }
+        .nickname{
+            position: absolute;
+            right: 2px;
+            bottom: 2px;
+            background: black;
+            z-index: 99;
+            filter:alpha(opacity=50);
+            -moz-opacity:0.5; 
+            opacity: 0.5;
+            color:white;
+            padding-left: 2px;
+            padding-right: 2px;
+        }
+
+        /**filter**/
+        .none {
+            -webkit-filter: none;
+            filter: none;
+        }
+        .blur {
+            -webkit-filter: blur(3px);
+            filter: blur(3px);
+        }
+        .grayscale {
+            -webkit-filter: grayscale(1);
+            filter: grayscale(1);
+        }
+        .invert {
+            -webkit-filter: invert(1);
+            filter: invert(1);
+        }
+        .sepia {
+            -webkit-filter: sepia(1);
+            filter: sepia(1);
+        }
+    </style>
+
+    <script src="bower_components/adapter.js/adapter.js"></script>
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="bower_components/demo-console/index.js"></script>
+    <script src="bower_components/draggabilly/dist/draggabilly.pkgd.min.js"></script>
+    <script src="bower_components/ekko-lightbox/dist/ekko-lightbox.min.js"></script>
+    <script src="bower_components/kurento-utils/js/kurento-utils.js"></script>
+    <script src="js/index.js"></script>
+</head>
+<body>
+	<div style="width: 250px;float: left;">
+        <div>
+            <input class="input" type="text" id="user_id" placeholder="user_id" />
+            <input class="input" type="text" id="nickname" style="display: none;" value="default" placeholder="nickname" />
+            <select class="input" id="user_type">
+                <option value=1>学生</option>
+                <option value=2>老师</option>
+            </select>
+            <input type="button" id="submit" value="submit">
+        </div>
+        <div>
+            <input class="input" type="text" id="class_id" placeholder="class_id" />
+            <input type="button" id="call" value="call">
+            <br>
+            <input class="input" type="text" id="max_video_recv_band_width" placeholder="max_video_recv_band_width" />
+            <input class="input" type="text" id="width" placeholder="width" />
+            <input class="input" type="text" id="height" placeholder="height" />
+            <input class="input" type="text" id="frame_rate" placeholder="frame_rate" />
+            <input type="button" id="reset" value="reset">
+            <input type="button" id="snapshot" value="snapshot">
+            <select id="filter">
+                <option value="none">none</option>
+                <option value="blur">blur</option>
+                <option value="grayscale">grayscale</option>
+                <option value="invert">invert</option>
+                <option value="sepia">sepia</option>
+            </select>
+        </div>
+        <div id="video_box_teacher" class="video_box">
+            <div class="nickname"></div>
+            <video id="video_teacher" class="video" autoplay></video>
+        </div> 
+        <div id="video_box_student_1" class="video_box">
+            <div class="nickname"></div>
+            <video id="video_student_1" class="video" autoplay></video>
+        </div> 
+        <div id="video_box_student_2" class="video_box">
+            <div class="nickname"></div>
+            <video id="video_student_2" class="video" autoplay></video>
+        </div>
+        <canvas id="pic"></canvas>
+    </div>
+    <div style="float: left;width: 900px;">
+        <div style="width: 100%;margin-top: 55px;line-height: 450px;font-size:50px;text-align: center;">
+            我是PDF
+        </div>
+    </div>
+</body>
+</html>
