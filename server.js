@@ -10,6 +10,11 @@ var fs    = require('fs');
 var https = require('https');
 var redis = require("redis");
 
+/**
+ * config
+ */
+var config = require('./config/config.js');
+
 var redis_client = redis.createClient();
 const REDIS_EXPIRE = 3600;
 
@@ -34,8 +39,6 @@ function storeSession(session_id,key,value,callback){
  */
 const USER_TYPE_STUDENT = 1;
 const USER_TYPE_TEACHER = 2;
-
-const MAX_USER_NUM = 3;
 
 var argv = minimist(process.argv.slice(2), {
   default: {
@@ -597,8 +600,8 @@ function join_class(session_id,class_id,user_id,ws){
 			};
 		}
 	});
-	if (others.length >= MAX_USER_NUM) {
-		return err('max user num is '+MAX_USER_NUM);
+	if (others.length >= config.max_user_count) {
+		return err('max user num is '+config.max_user_count);
 	};
 	var r = class_room.join(user_id);
 	if (r !== true) {
