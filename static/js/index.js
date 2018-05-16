@@ -327,6 +327,7 @@ function incomingCall(msg){
 
 function startCom(msg){
 	PEERS[msg.user_id].processAnswer(msg.sdp_answer);
+	
 	//stats
 	// setInterval(function(){
 	// 	PEERS[msg.user_id].peerConnection.getStats(function(results){

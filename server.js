@@ -197,6 +197,7 @@ function Pipeline(){
 function Peer(){
 	this.endpoints = {};
 	this.user_ids = [];
+	this.missing_inboundrtp_count = 0;
 }
 
 Pipeline.prototype.getPipeline = function(client,callback){
@@ -230,6 +231,10 @@ Pipeline.prototype.create = function(caller_id,callee_id,ws,callback){
 				}
 				
 				self.pipeline = pipeline;
+
+				if (config.latency) {
+					pipeline.setLatencyStats(true);
+				}
 
 				//create peer
 				var peer = new Peer();
@@ -849,6 +854,40 @@ function stop(ws){
 	return stopUser(user_id);
 }
 
+function reconnect(user_id){
+	var user = USERS.get(user_id);
+	if (user) {
+		var class_id = user.class_id;
+		var class_room = CLASSROOM[class_id];
+		if (class_room) {
+			stopEndpoints(class_room,user_id,user);
+			user_ids = class_room.user_ids;
+			var others = [];
+			Object.keys(user_ids).forEach(function(user_id_in_class){
+				if (user_id_in_class == user_id){
+					//do nothing
+				}else{
+					if (USERS.get(user_id_in_class)) {
+						var other_user = USERS.get(user_id_in_class);
+						others.push({
+							user_id:user_id_in_class,
+							user_type:other_user.user_type
+						});
+					};
+				}
+			});
+			var message  = {
+		        id: 'joinResp',
+		        status: 1,
+		        others:others,
+		        class_id:class_id,
+		        options:user.options
+		    };
+		    user.send(message);
+		}
+	}
+}
+
 function reset(session_id,data){
 	var user_id = data.user_id;
 	var max_video_recv_band_width = Number(data.max_video_recv_band_width);
@@ -905,5 +944,77 @@ function clearCandidatesQueue(user_id) {
         CANDIDATES_QUEUE[user_id] = {};
     }
 }
+
+if (config.missing_inboundrtp_check_intval > 0) {
+	var BreakException = {};
+	setInterval(function(){
+		Object.keys(CLASSROOM).forEach(function(class_id){
+			var room = CLASSROOM[class_id];
+			var pipeline = room.pipeline;
+			var class_break = false;
+			if (pipeline) {
+				try{
+					Object.keys(pipeline.peers).forEach(function(peer_key){
+						if (class_break) {
+							throw BreakException;
+						}
+						var peer = pipeline.peers[peer_key];
+						try{
+							Object.keys(peer.endpoints).forEach(function(user_key){
+								var end_point = peer.endpoints[user_key];
+								if (end_point) {
+									end_point.getStats('VIDEO',function(error,stats){
+										var has_in = false;
+										Object.keys(stats).forEach(function(id){
+											if (stats[id].type == 'inboundrtp') {
+												has_in = true;
+											}
+										});
+										if (!has_in) {
+											peer.missing_inboundrtp_count ++;
+											if (peer.missing_inboundrtp_count >= config.missing_inboundrtp_times) {
+												console.log('missing inboundrtp reconnect:user '+user_key);
+												reconnect(user_key);
+												class_break = true;
+											}
+											throw BreakException;
+										}
+									});
+								}
+							});
+						}catch(e){
+
+						}
+					});
+				}catch(e){
+
+				}
+			}
+		});
+	},config.missing_inboundrtp_check_intval*1000);
+}
+
+setInterval(function(){
+	console.log('~~~~~ STATS ~~~~~');
+	Object.keys(CLASSROOM).forEach(function(class_id){
+		var room = CLASSROOM[class_id];
+		var pipeline = room.pipeline;
+		if (pipeline) {
+			Object.keys(pipeline.peers).forEach(function(peer_key){
+				var peer = pipeline.peers[peer_key];
+				Object.keys(peer.endpoints).forEach(function(user_key){
+					var end_point = peer.endpoints[user_key];
+					if (end_point) {
+						end_point.getStats('VIDEO',function(error,stats){
+							console.log('___CLASS:'+class_id+'__PEER:'+peer_key+'__USER:'+user_key+'__'+Date.now()+'______');
+							console.log(JSON.stringify(stats));
+							console.log('===================');
+						});
+					}
+				});
+			});
+		}
+	});
+},5000);
 
 app.use(express.static(path.join(__dirname, 'static')));
