@@ -1,4 +1,6 @@
-# Engine
+# Yharnam
+
+video chat room based on webrtc and kurento
 
 ## dependency
 
