@@ -87,9 +87,12 @@ function register() {
 	USER_TYPE = user_type;
 	VIDEO_BOX_SELF.find(".nickname").text('User '+USER_ID);
 
-	var constraints = {video: true};
+	var constraints = {video: true,audio:true};
 
-	navigator.getUserMedia(constraints, successCallback, errorCallback);
+	//navigator.getUserMedia(constraints, successCallback, errorCallback);
+	navigator.mediaDevices.getUserMedia(constraints).then(function(stream){
+		VIDEO_BOX_SELF.find("video")[0].srcObject = stream;
+	});
 
 	var nickname = document.getElementById('nickname').value;
 	var message = {

@@ -84,7 +84,7 @@
     <script src="bower_components/demo-console/index.js"></script>
     <script src="bower_components/draggabilly/dist/draggabilly.pkgd.min.js"></script>
     <script src="bower_components/ekko-lightbox/dist/ekko-lightbox.min.js"></script>
-    <script src="bower_components/kurento-utils/js/kurento-utils.js"></script>
+    <script src="js/kurento-utils-dev.js"></script>
     <script src="js/index.js"></script>
 </head>
 <body>
@@ -119,11 +119,11 @@
         <div id="ground" style="width: 100%;">
              <div id="video_box_self" class="video_box">
                 <div class="nickname"></div>
-                <video class="video" autoplay></video>
+                <video class="video" autoplay playsinline></video>
             </div>
             <div id="video_box_copy" class="video_box">
                 <div class="nickname"></div>
-                <video class="video" autoplay></video>
+                <video class="video" autoplay playsinline></video>
             </div>
         </div>
         <canvas id="pic"></canvas>
