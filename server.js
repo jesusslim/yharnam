@@ -965,12 +965,14 @@ if (config.missing_inboundrtp_check_intval > 0) {
 								if (end_point) {
 									end_point.getStats('VIDEO',function(error,stats){
 										var has_in = false;
-										Object.keys(stats).forEach(function(id){
-											if (stats[id].type == 'inboundrtp') {
-												has_in = true;
-											}
-										});
-										if (!has_in) {
+										if (!error) {
+											Object.keys(stats).forEach(function(id){
+												if (stats[id].type == 'inboundrtp') {
+													has_in = true;
+												}
+											});
+										}
+										if (!has_in || error) {
 											peer.missing_inboundrtp_count ++;
 											if (peer.missing_inboundrtp_count >= config.missing_inboundrtp_times) {
 												console.log('missing inboundrtp reconnect:user '+user_key);

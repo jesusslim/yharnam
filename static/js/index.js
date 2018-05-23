@@ -7,32 +7,14 @@ var USER_ID = 0;
 var CLASS_ID = 0;
 var USER_TYPE = 0;
 
-var VIDEO_TEACHER;
-var VIDEO_STUDENT_1;
-var VIDEO_STUDENT_2;
-var VIDEO_SELF;
-
-var VIDEO_BOX_TEACHER;
-var VIDEO_BOX_STUDENT_1;
-var VIDEO_BOX_STUDENT_2;
 var VIDEO_BOX_SELF;
-
-var TEACHERS_SIDS = [0,0];
-// var TEACHER_ID = 0;
-// var STUDENT_1_ID = 0;
-// var STUDENT_2_ID = 0;
 
 var PEERS = {};
 
 var OPTIONS = {};
 
 window.onload = function() {
-	VIDEO_BOX_TEACHER = document.getElementById('video_box_teacher');
-	VIDEO_BOX_STUDENT_1 = document.getElementById('video_box_student_1');
-	VIDEO_BOX_STUDENT_2 = document.getElementById('video_box_student_2');
-	VIDEO_TEACHER = document.getElementById('video_teacher');
-	VIDEO_STUDENT_1 = document.getElementById('video_student_1');
-	VIDEO_STUDENT_2 = document.getElementById('video_student_2');
+	VIDEO_BOX_SELF = $("#video_box_self");
 	document.getElementById('submit').addEventListener('click', function() {
 		register();
 	});
@@ -47,7 +29,8 @@ window.onload = function() {
 	});
 	$("#filter").change(function(){
 		var cls = $("#filter").val();
-		$(VIDEO_SELF).removeClass($(VIDEO_SELF).attr("filter")).addClass(cls).attr("filter",cls);
+		var video = VIDEO_BOX_SELF.find("video");
+		video.removeClass(video.attr("filter")).addClass(cls).attr("filter",cls);
 	});
 }
 
@@ -102,14 +85,7 @@ function register() {
 	USER_ID = user_id;
 	var user_type = document.getElementById('user_type').value;
 	USER_TYPE = user_type;
-	if (USER_TYPE == USER_TYPE_TEACHER) {
-		VIDEO_SELF = VIDEO_TEACHER;
-		VIDEO_BOX_SELF = VIDEO_BOX_TEACHER;
-	}else{
-		VIDEO_SELF = VIDEO_STUDENT_2;
-		VIDEO_BOX_SELF = VIDEO_BOX_STUDENT_2;
-	}
-	$(VIDEO_BOX_SELF).find(".nickname").text('User '+USER_ID);
+	VIDEO_BOX_SELF.find(".nickname").text('User '+USER_ID);
 
 	var constraints = {video: true};
 
@@ -129,12 +105,12 @@ function register() {
 function successCallback(stream) {
 
 	if (window.webkitURL) {
-        VIDEO_SELF.src = window.webkitURL.createObjectURL(stream);
+        VIDEO_BOX_SELF.find("video")[0].src = window.webkitURL.createObjectURL(stream);
     } else {
-        VIDEO_SELF.src = stream;
+        VIDEO_BOX_SELF.find("video")[0].src = stream;
     }
 
-	VIDEO_SELF.play();
+	VIDEO_BOX_SELF.find("video")[0].play();
 }
 
 function errorCallback(error){
@@ -182,6 +158,7 @@ function joinResp(msg){
 		OPTIONS = msg.options;
 		for (var i = 0; i < msg.others.length; i++) {
 			var to_user = msg.others[i];
+			newBox(to_user.user_id);
 			call(to_user.user_id,to_user.user_type,i);
 		}
 	}else{
@@ -189,34 +166,27 @@ function joinResp(msg){
 	}
 }
 
+function newBox(user_id){
+	if($("#video_box_"+user_id).length > 0){
+		return true;
+	}
+	var box = $("#video_box_copy").clone();
+	box.attr("id",'video_box_'+user_id);
+	box.attr("user_id",user_id);
+	$("#ground").append(box);
+	box.show();
+}
+
 function call(to_user_id,user_type,index){
 	console.log('call '+to_user_id + ', user_type is '+user_type);
 
-	var rmt_box = VIDEO_BOX_STUDENT_1;
-	var rmt_vdo = VIDEO_STUDENT_1;
-	if (USER_TYPE == 1) {
-		if (user_type == 2) {
-			rmt_vdo = VIDEO_TEACHER;
-			rmt_box = VIDEO_BOX_TEACHER;
-		}
-	}else{
-		//i am teacher
-		if (TEACHERS_SIDS[0] == 0) {
-			TEACHERS_SIDS[0] = to_user_id;
-		}else if(TEACHERS_SIDS[0] > 0 && to_user_id == TEACHERS_SIDS[0]) {
-
-		}else{
-			TEACHERS_SIDS[1] = to_user_id;
-			rmt_vdo = VIDEO_STUDENT_2;
-			rmt_box = VIDEO_BOX_STUDENT_2;
-		}
-	}
-
+	var rmt_box = $("#video_box_"+to_user_id)[0];
+	var rmt_vdo = $("#video_box_"+to_user_id).find("video")[0];
 	$(rmt_box).find(".nickname").text('User '+to_user_id);
 
 	//vdo
 	var options = {
-		localVideo : VIDEO_SELF,
+		//localVideo : VIDEO_BOX_SELF.find("video")[0],
 		remoteVideo : rmt_vdo,
 		onicecandidate : function(candidate){
 			onIceCandidate(candidate,to_user_id);
@@ -266,31 +236,15 @@ function incomingCall(msg){
 	var class_id = msg.class_id;
 	console.log('incoming call ,user_id '+from_user_id+' user_type '+from_user_type);
 
-	var rmt_box = VIDEO_BOX_STUDENT_1;
-	var rmt_vdo = VIDEO_STUDENT_1;
+	newBox(from_user_id);
 
-	if (USER_TYPE == 1) {
-		if (user_type == 2) {
-			rmt_vdo = VIDEO_TEACHER;
-			rmt_box = VIDEO_BOX_TEACHER;
-		}
-	}else{
-		if (TEACHERS_SIDS[0] == 0) {
-			TEACHERS_SIDS[0] = from_user_id;
-		}else if (TEACHERS_SIDS[0] > 0 && from_user_id == TEACHERS_SIDS[0]) {
-
-		}else{
-			TEACHERS_SIDS[1] = from_user_id;
-			rmt_vdo = VIDEO_STUDENT_2;
-			rmt_box = VIDEO_BOX_STUDENT_2;
-		}
-	}
-
+	var rmt_box = $("#video_box_"+from_user_id)[0];
+	var rmt_vdo = $("#video_box_"+from_user_id).find("video")[0];
 	$(rmt_box).find(".nickname").text('User '+from_user_id);
 
 	//vdo
 	var options = {
-		localVideo : VIDEO_SELF,
+		//localVideo : VIDEO_BOX_SELF.find("video")[0],
 		remoteVideo : rmt_vdo,
 		onicecandidate : function(candidate){
 			onIceCandidate(candidate,from_user_id);
@@ -368,7 +322,8 @@ function reset(){
 
 function snapshot(){
 	var canvas = $("#pic")[0];
-	canvas.width = VIDEO_SELF.videoWidth;
-  	canvas.height = VIDEO_SELF.videoHeight;
-  	canvas.getContext('2d').drawImage(VIDEO_SELF, 0, 0, canvas.width, canvas.height);
+	var video = VIDEO_BOX_SELF.find("video")[0];
+	canvas.width = video.videoWidth;
+  	canvas.height = video.videoHeight;
+  	canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
 }

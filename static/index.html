@@ -14,11 +14,16 @@
 
     <style type="text/css">
         .video_box {
-            height:170px;
+            width: 250px;
+            min-height:185px;
             margin-top: 2px;
             margin-bottom: 2px;
             background: #f0f0f0;
             position:relative;
+            margin-top:10px;
+            margin-left: 10px;
+            float: left;
+            border-radius: 20px;
         }
         .input{
             width: 50px;
@@ -26,6 +31,7 @@
         .video{
             max-width: 250px;
             min-width: 250px;
+            border-radius: 20px;
         }
         .nickname{
             position: absolute;
@@ -39,6 +45,14 @@
             color:white;
             padding-left: 2px;
             padding-right: 2px;
+        }
+        #pic{
+            max-width: 250px;
+            min-width: 250px;
+            border-radius: 20px;
+        }
+        #video_box_copy{
+            display: none;
         }
 
         /**filter**/
@@ -74,7 +88,7 @@
     <script src="js/index.js"></script>
 </head>
 <body>
-	<div style="width: 250px;float: left;">
+	<div style="width: 100%;float: left;">
         <div>
             <input class="input" type="text" id="user_id" placeholder="user_id" />
             <input class="input" type="text" id="nickname" style="display: none;" value="default" placeholder="nickname" />
@@ -102,24 +116,17 @@
                 <option value="sepia">sepia</option>
             </select>
         </div>
-        <div id="video_box_teacher" class="video_box">
-            <div class="nickname"></div>
-            <video id="video_teacher" class="video" autoplay></video>
-        </div> 
-        <div id="video_box_student_1" class="video_box">
-            <div class="nickname"></div>
-            <video id="video_student_1" class="video" autoplay></video>
-        </div> 
-        <div id="video_box_student_2" class="video_box">
-            <div class="nickname"></div>
-            <video id="video_student_2" class="video" autoplay></video>
+        <div id="ground" style="width: 100%;">
+             <div id="video_box_self" class="video_box">
+                <div class="nickname"></div>
+                <video class="video" autoplay></video>
+            </div>
+            <div id="video_box_copy" class="video_box">
+                <div class="nickname"></div>
+                <video class="video" autoplay></video>
+            </div>
         </div>
         <canvas id="pic"></canvas>
-    </div>
-    <div style="float: left;width: 900px;">
-        <div style="width: 100%;margin-top: 55px;line-height: 450px;font-size:50px;text-align: center;">
-            我是PDF
-        </div>
     </div>
 </body>
 </html>
