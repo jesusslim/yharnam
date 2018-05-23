@@ -462,6 +462,7 @@ var ws_server = new ws.Server({
 
 ws_server.on('connection',function(ws){
 	var session_id = null;
+	var ip = ws._socket.remoteAddress;
     var request = ws.upgradeReq;
     var response = {
         writeHead : {}
@@ -469,7 +470,7 @@ ws_server.on('connection',function(ws){
 
     sessionHandler(request, response, function(err) {
         session_id = request.session.id;
-		console.log('new connection , session id is '+session_id);
+		console.log('new connection , session id is '+session_id + ' , ip is '+ip);
 		//check session logged
 		
 		redis_client.get(session_id,function(error,result){
