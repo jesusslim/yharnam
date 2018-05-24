@@ -682,7 +682,7 @@ function incomingCallResp(session_id,class_id,from,to,status,sdp_offer,ws){
 				from:from,
 				user_id:from,
 				class_id:class_id,
-				user_type:callee.user_type
+				user_type:callee ? callee.user_type : 0
 			});
 		}
 		callee.send({
@@ -690,7 +690,7 @@ function incomingCallResp(session_id,class_id,from,to,status,sdp_offer,ws){
 			from:to,
 			user_id:to,
 			class_id:class_id,
-			user_type:caller.user_type
+			user_type:caller ? caller.user_type : 0
 		});
 	}
 
@@ -809,43 +809,45 @@ function stopEndpoints(classroom,user_id,user){
 	}
 
 	//release pipeline
-	peers = classroom.pipeline.peers;
-	Object.keys(peers).forEach(function(peer_key){
-		var peer = peers[peer_key];
-		var user_ids = peer.user_ids;
-		for (var i = 0; i < user_ids.length; i++) {
-			if (user_ids[i] == user_id) {
-				delete peers[peer_key];
-				//send msg
-				for (var j = 0; j < user_ids.length; j++) {
-					if (user_ids[j] != user_id) {
-						if (USERS.get(user_ids[j])) {
-							USERS.get(user_ids[j]).send({
-								id:'stopCom',
-								msg:'remote user leave',
-								user_id:user_id
-							});
-							// try{
-							// 	user.send({
-							// 		id:'stopCom',
-							// 		msg:'u leave',
-							// 		user_id:user_id
-							// 	});
-							// }catch(e){
+	if (classroom.pipeline) {
+		peers = classroom.pipeline.peers;
+		Object.keys(peers).forEach(function(peer_key){
+			var peer = peers[peer_key];
+			var user_ids = peer.user_ids;
+			for (var i = 0; i < user_ids.length; i++) {
+				if (user_ids[i] == user_id) {
+					delete peers[peer_key];
+					//send msg
+					for (var j = 0; j < user_ids.length; j++) {
+						if (user_ids[j] != user_id) {
+							if (USERS.get(user_ids[j])) {
+								USERS.get(user_ids[j]).send({
+									id:'stopCom',
+									msg:'remote user leave',
+									user_id:user_id
+								});
+								// try{
+								// 	user.send({
+								// 		id:'stopCom',
+								// 		msg:'u leave',
+								// 		user_id:user_id
+								// 	});
+								// }catch(e){
 
-							// }
+								// }
+							}
 						}
 					}
+					break;
 				}
-				break;
 			}
-		}
-	});
+		});
 
-	//empty class remove pipeline
-	if (Object.keys(classroom.pipeline.peers).length <= 0) {
-		classroom.pipeline.release();
-		classroom.pipeline = null;
+		//empty class remove pipeline
+		if (Object.keys(classroom.pipeline.peers).length <= 0) {
+			classroom.pipeline.release();
+			classroom.pipeline = null;
+		}
 	}
 }
 
