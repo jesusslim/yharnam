@@ -36,6 +36,7 @@ video chat room based on webrtc and kurento
 ### install npm/bower/node
 	
 	curl -sL https://deb.nodesource.com/setup_4.x | sudo bash -
+	apt-get update
 	sudo apt-get install -y nodejs
 	sudo npm install -g bower
 	

@@ -78,7 +78,8 @@
         }
     </style>
 
-    <script src="bower_components/adapter.js/adapter.js"></script>
+    <script src="bower_components/adapter.js/release/adapter.js"></script>
+<!--     <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script> -->
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="bower_components/demo-console/index.js"></script>
@@ -100,9 +101,11 @@
         </div>
         <div>
             <input class="input" type="text" id="class_id" placeholder="class_id" />
-            <input type="button" id="call" value="call">
+            <input type="button" id="call" value="call" />
+            <input type="button" id="stop" value="stop" />
             <br>
-            <input class="input" type="text" id="max_video_recv_band_width" placeholder="max_video_recv_band_width" />
+            <input class="input" type="text" id="upload_max_video_band_width" placeholder="upload_max_video_band_width" />
+            <input class="input" type="text" id="download_max_video_band_width" placeholder="download_max_video_band_width" />
             <input class="input" type="text" id="width" placeholder="width" />
             <input class="input" type="text" id="height" placeholder="height" />
             <input class="input" type="text" id="frame_rate" placeholder="frame_rate" />
@@ -115,6 +118,7 @@
                 <option value="invert">invert</option>
                 <option value="sepia">sepia</option>
             </select>
+            <input type="button" id="record" value="record" />
         </div>
         <div id="ground" style="width: 100%;">
              <div id="video_box_self" class="video_box">

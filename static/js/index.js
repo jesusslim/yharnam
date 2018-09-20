@@ -1,11 +1,8 @@
-var ws = new WebSocket('wss://' + location.host + '/ludwig');
+var ws = new WebSocket('wss://' + location.host + '/ladymaria');
 
-const USER_TYPE_TEACHER = 2;
-const USER_TYPE_STUDENT = 1;
+var USER_ID;
 
-var USER_ID = 0;
-var CLASS_ID = 0;
-var USER_TYPE = 0;
+var CLASS_ID;
 
 var VIDEO_BOX_SELF;
 
@@ -14,6 +11,8 @@ var PEERS = {};
 var OPTIONS = {};
 
 window.onload = function() {
+	$('#stop').attr('disabled', true);
+	$('#call').attr('disabled', true);
 	VIDEO_BOX_SELF = $("#video_box_self");
 	document.getElementById('submit').addEventListener('click', function() {
 		register();
@@ -21,11 +20,20 @@ window.onload = function() {
 	document.getElementById('call').addEventListener('click', function() {
 		joinClass();
 	});
+	document.getElementById('stop').addEventListener('click', function() {
+		stop();
+	});
 	document.getElementById('reset').addEventListener('click', function() {
 		reset();
 	});
 	document.getElementById('snapshot').addEventListener('click', function() {
 		snapshot();
+	});
+	document.getElementById('pic').addEventListener('click', function() {
+		$("#pic").hide();
+	});
+	document.getElementById('record').addEventListener('click', function() {
+		record();
 	});
 	$("#filter").change(function(){
 		var cls = $("#filter").val();
@@ -43,9 +51,6 @@ ws.onmessage = function(message){
 	console.info('Received message: ' + msg.id);
 
 	switch(msg.id){
-		case 'auto':
-			auto(msg);
-			break;
 		case 'regResp':
 			regResp(msg);
 			break;
@@ -55,36 +60,42 @@ ws.onmessage = function(message){
 		case 'callResp':
 			callResp(msg);
 			break;
-		case 'incomingCall':
-			incomingCall(msg);
-			break;
-		case 'startCom':
-			startCom(msg);
-			break;
-		case 'stopCom':
-			stopCom(msg);
+		case 'someoneLeave':
+			someoneLeave(msg);
 			break;
 		case 'iceCandidate':
-			PEERS[msg.user_id].addIceCandidate(msg.candidate);
+			PEERS[msg.user_id].addIceCandidate(msg.candidate,function(error){
+				if (error) {
+					console.error(error);
+				}
+			});
+			break;
+		case 'someoneComein':
+			someoneComein(msg);
 			break;
 		default:
 			console.error('Unrecognized message', msg);		
 	}
+}
 
+ws.onerror = function(event){
+	alert("socket error:"+JSON.stringify(event));
 }
 
 function sendMessage(message){
 	var jsonMessage = JSON.stringify(message);
 	console.log('Send message:'+message.id);
 	//console.log('Senging message: ' + jsonMessage);
-	ws.send(jsonMessage);
+	try{
+		ws.send(jsonMessage);		
+	}catch(e){
+		alert("socket error:"+JSON.stringify(e));
+	}
 }
 
 function register() {
 	var user_id = document.getElementById('user_id').value;
 	USER_ID = user_id;
-	var user_type = document.getElementById('user_type').value;
-	USER_TYPE = user_type;
 	VIDEO_BOX_SELF.find(".nickname").text('User '+USER_ID);
 
 	var constraints = {video: true,audio:true};
@@ -98,46 +109,16 @@ function register() {
 	var message = {
 		id : 'reg',
 		user_id : user_id,
-		nickname:nickname,
-		user_type:user_type
+		nickname:nickname
 	};
 	sendMessage(message);
 	$('#submit').attr('disabled', true);
 }
 
-function successCallback(stream) {
-
-	if (window.webkitURL) {
-        VIDEO_BOX_SELF.find("video")[0].src = window.webkitURL.createObjectURL(stream);
-    } else {
-        VIDEO_BOX_SELF.find("video")[0].src = stream;
-    }
-
-	VIDEO_BOX_SELF.find("video")[0].play();
-}
-
-function errorCallback(error){
-  	console.log("getUserMedia error: ", error);
-}
-
-function auto(msg){
-	msg = msg.data;
-	if (msg.class_id > 0) {
-		$("#class_id").val(msg.class_id);
-	}
-	if (msg.user_id > 0) {
-		$("#user_id").val(msg.user_id);
-		$("#user_type").val(msg.user_type);
-		register();
-	}
-}
-
 function regResp(msg){
 	if (msg.status == 1) {
 		//alert('reg success');
-		if ($("#class_id").val() > 0) {
-			joinClass();
-		}
+		$("#call").attr('disabled',false);
 	}else{
 		alert(msg.msg);
 		$('#submit').attr('disabled', false);
@@ -148,21 +129,33 @@ function joinClass(){
 	var class_id = document.getElementById('class_id').value;
 	var message = {
 		id : 'join',
-		from : USER_ID,
 		class_id:class_id
 	};
 	sendMessage(message);
 	$('#call').attr('disabled', true);
+	$('#stop').attr('disabled', false);
+}
+
+function stop(){
+	var message = {
+		id : 'stop',
+		class_id:CLASS_ID
+	};
+	sendMessage(message);
+	$('#call').attr('disabled', true);
+	$('#submit').attr('disabled', false);
 }
 
 function joinResp(msg){
 	if (msg.status == 1) {
 		CLASS_ID = msg.class_id;
 		OPTIONS = msg.options;
+		send();
 		for (var i = 0; i < msg.others.length; i++) {
 			var to_user = msg.others[i];
+			console.log('other is '+to_user.user_id);
 			newBox(to_user.user_id);
-			call(to_user.user_id,to_user.user_type,i);
+			call(to_user.user_id);
 		}
 	}else{
 		alert(msg.msg);
@@ -180,27 +173,53 @@ function newBox(user_id){
 	box.show();
 }
 
-function call(to_user_id,user_type,index){
-	console.log('call '+to_user_id + ', user_type is '+user_type);
-
-	var rmt_box = $("#video_box_"+to_user_id)[0];
-	var rmt_vdo = $("#video_box_"+to_user_id).find("video")[0];
-	$(rmt_box).find(".nickname").text('User '+to_user_id);
-
-	//vdo
+function send(){
 	var options = {
-		//localVideo : VIDEO_BOX_SELF.find("video")[0],
-		remoteVideo : rmt_vdo,
+		localVideo : VIDEO_BOX_SELF.find("video")[0],
 		onicecandidate : function(candidate){
-			onIceCandidate(candidate,to_user_id);
+			onIceCandidate(candidate,USER_ID);
 		},
 		mediaConstraints:{
 			audio : true,
 			video : OPTIONS
 		}
 	}
+	PEERS[USER_ID] = new kurentoUtils.WebRtcPeer.WebRtcPeerSendonly(options,
+		function (error) {
+			if(error) {
+			  return console.error(error);
+			}
+			this.generateOffer(function(error,offerSdp){
+				if (error) {
+					console.error(error);
+				}
+				var message = {
+					id : 'call',
+					user_id : USER_ID,
+					class_id:CLASS_ID,
+					sdp_offer:offerSdp
+				};
+				sendMessage(message);
+			});
+	});
+}
 
-	PEERS[to_user_id] = kurentoUtils.WebRtcPeer.WebRtcPeerSendrecv(options, 
+function call(user_id){
+	console.log('call '+user_id);
+
+	var rmt_box = $("#video_box_"+user_id)[0];
+	var rmt_vdo = $("#video_box_"+user_id).find("video")[0];
+	$(rmt_box).find(".nickname").text('User '+user_id);
+
+	//vdo
+	var options = {
+		remoteVideo : rmt_vdo,
+		onicecandidate : function(candidate){
+			onIceCandidate(candidate,user_id);
+		}
+	}
+
+	PEERS[user_id] = kurentoUtils.WebRtcPeer.WebRtcPeerRecvonly(options, 
 		function(error) {
 			if (error) {
 				console.error(error);
@@ -212,9 +231,8 @@ function call(to_user_id,user_type,index){
 				}
 				var message = {
 					id : 'call',
-					from : USER_ID,
+					user_id : user_id,
 					class_id:CLASS_ID,
-					to:to_user_id,
 					sdp_offer:offerSdp
 				};
 				sendMessage(message);
@@ -225,98 +243,50 @@ function call(to_user_id,user_type,index){
 
 function callResp(msg){
 	if (msg.status != 1) {
-		console.info('call fail ' + msg.msg);
-		//TODO:recall?
-	} else {
-		PEERS[msg.from].processAnswer(msg.sdp_answer);
-	}
-}
-
-function incomingCall(msg){
-	var from_user_id = msg.from;
-	var from_user_type = msg.user_type;
-	var user_type = from_user_type;
-	var class_id = msg.class_id;
-	console.log('incoming call ,user_id '+from_user_id+' user_type '+from_user_type);
-
-	newBox(from_user_id);
-
-	var rmt_box = $("#video_box_"+from_user_id)[0];
-	var rmt_vdo = $("#video_box_"+from_user_id).find("video")[0];
-	$(rmt_box).find(".nickname").text('User '+from_user_id);
-
-	//vdo
-	var options = {
-		//localVideo : VIDEO_BOX_SELF.find("video")[0],
-		remoteVideo : rmt_vdo,
-		onicecandidate : function(candidate){
-			onIceCandidate(candidate,from_user_id);
-		},
-		mediaConstraints:{
-			audio : true,
-			video : OPTIONS
-		}
-	}
-
-	PEERS[from_user_id] = kurentoUtils.WebRtcPeer.WebRtcPeerSendrecv(options,
-			function(error) {
-				if (error) {
-					console.error(error);
-				}
-
-				this.generateOffer(function(error, offerSdp) {
-					if (error) {
-						console.error(error);
-					}
-					var response = {
-						id : 'incomingCallResp',
-						from : USER_ID,
-						status:1,
-						sdp_offer : offerSdp,
-						class_id:class_id,
-						to:from_user_id
-					};
-					sendMessage(response);
-				});
+		console.info('call fail ' + JSON.stringify(msg.msg));
+		alert(msg.msg);
+	} else{
+		PEERS[msg.user_id].processAnswer(msg.sdp_answer,function(error){
+			if (error) {
+				console.error(error);
 			}
-	);
+		});
+	}
 }
 
-function startCom(msg){
-	PEERS[msg.user_id].processAnswer(msg.sdp_answer);
-	
-	//stats
-	// setInterval(function(){
-	// 	PEERS[msg.user_id].peerConnection.getStats(function(results){
-	// 		results = results.result();
-	// 		console.log(results);
-	// 	});
-	// },5000);
-}
-
-function stopCom(msg){
-	console.log('stop communication by user_id : '+msg.user_id);
-	console.log(PEERS);
-	PEERS[msg.user_id].dispose();
-}
-
-function onIceCandidate(candidate,with_whom){
-	//console.log('local candidate:'+JSON.stringify(candidate));
-
+function onIceCandidate(candidate,user_id){
 	sendMessage({
 		id:'onIceCandidate',
-		user_id:USER_ID,
+		user_id:user_id,
 		class_id:CLASS_ID,
-		candidate:candidate,
-		to:with_whom
+		candidate:candidate
 	});
 }
 
+function someoneComein(msg){
+	newBox(msg.user_id);
+	call(msg.user_id);
+}
+
+function someoneLeave(msg){
+	leave(msg.user_id);
+}
+
+function leave(user_id){
+	PEERS[user_id].dispose();
+	delete PEERS[user_id];
+	$("#video_box_"+user_id).remove();
+}
+
 function reset(){
+	for (var user_id in PEERS) {
+        leave(user_id);
+    }
 	sendMessage({
 		id:'reset',
 		user_id:USER_ID,
-		max_video_recv_band_width:$('#max_video_recv_band_width').val(),
+		upload_max_video_band_width:$('#upload_max_video_band_width').val(),
+		download_max_video_band_width:$('#download_max_video_band_width').val(),
 		width:$("#width").val(),
 		height:$("#height").val(),
 		frame_rate:$("#frame_rate").val()
@@ -329,4 +299,12 @@ function snapshot(){
 	canvas.width = video.videoWidth;
   	canvas.height = video.videoHeight;
   	canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+  	$("#pic").show();
+}
+
+function record(){
+	sendMessage({
+		id:'record',
+		class_id:CLASS_ID
+	});
 }

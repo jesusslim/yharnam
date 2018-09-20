@@ -18,7 +18,7 @@
     "tests"
   ],
   "dependencies": {
-    "adapter.js": "v0.2.9",
+    "adapter.js": "master",
     "bootstrap": "~3.3.0",
     "draggabilly": "~1.2.4",
     "demo-console": "1.5.1",
