@@ -306,10 +306,12 @@ ws_server.on('connection',function(ws){
 
             case 'record':
             	record(msg.class_id);
+            	break;
 
             case 'mario':
             	var user_id = request.session.user_id;
             	mario(user_id);
+            	break;
 
 			default:
 	            ws.send(JSON.stringify({
