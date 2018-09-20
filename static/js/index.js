@@ -35,6 +35,9 @@ window.onload = function() {
 	document.getElementById('record').addEventListener('click', function() {
 		record();
 	});
+	document.getElementById('mario').addEventListener('click', function() {
+		mario();
+	});
 	$("#filter").change(function(){
 		var cls = $("#filter").val();
 		var video = VIDEO_BOX_SELF.find("video");
@@ -306,5 +309,11 @@ function record(){
 	sendMessage({
 		id:'record',
 		class_id:CLASS_ID
+	});
+}
+
+function mario(){
+	sendMessage({
+		id:'marion'
 	});
 }

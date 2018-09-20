@@ -307,6 +307,10 @@ ws_server.on('connection',function(ws){
             case 'record':
             	record(msg.class_id);
 
+            case 'mario':
+            	var user_id = request.session.user_id;
+            	mario(user_id);
+
 			default:
 	            ws.send(JSON.stringify({
 	                id : 'error',
@@ -734,8 +738,6 @@ function recordForUser(user_id){
 	}
 }
 
-
-
 function getYmd(){
 	var date = new Date();
 	var year = date.getFullYear();
@@ -744,6 +746,38 @@ function getYmd(){
 	if (month < 10) {month = '0'+month;}
 	if (day < 10) {day = '0'+day;}
 	return year+'-'+month+'-'+day;
+}
+
+function mario(user_id){
+	var user = USERS.get(user_id);
+	var room = CLASSROOM[user.class_id]
+	room.pipeline.create('FaceOverlayFilter', function(error, faceOverlayFilter) {
+        if (error) {
+        	console.error(error);
+        	return error;
+        }
+        faceOverlayFilter.setOverlayedImage(url.format(as_url) + 'img/mario-wings.png',
+            -0.35, -1.2, 1.6, 1.6, 
+            function(error) {
+	            if (error) {
+	            	console.error(error);
+	                return error;
+	            }
+	            user.outgoingMedia.connect(faceOverlayFilter,function(error){
+	            	if (error) {
+			        	console.error(error);
+			        	return error;
+			        }
+			        faceOverlayFilter.connect(user.outgoingMedia,function(error){
+			        	if (error) {
+				        	console.error(error);
+				        	return error;
+				        }
+			        });
+	            });
+	        }
+		)
+	});
 }
 
 app.use(express.static(path.join(__dirname, 'static')));
