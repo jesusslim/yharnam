@@ -314,6 +314,6 @@ function record(){
 
 function mario(){
 	sendMessage({
-		id:'marion'
+		id:'mario'
 	});
 }
