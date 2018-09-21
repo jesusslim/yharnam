@@ -753,19 +753,21 @@ function getYmd(){
 function mario(user_id){
 	var user = USERS.get(user_id);
 	var room = CLASSROOM[user.class_id]
+	console.log('m1');
 	room.pipeline.create('FaceOverlayFilter', function(error, faceOverlayFilter) {
         if (error) {
-        	console.error(error);
+        	console.log(error);
         	return error;
         }
+        console.log('m2');
         faceOverlayFilter.setOverlayedImage(url.format(as_url) + 'img/mario-wings.png',
             -0.35, -1.2, 1.6, 1.6, 
             function(error) {
 	            if (error) {
-	            	console.error(error);
+	            	console.log(error);
 	                return error;
 	            }
-
+	            console.log('m3');
 	    //         Object.keys(room.user_ids).forEach(function(user_id_in_class){
 					// if (USERS.get(user_id_in_class) && user_id_in_class != user_id) {
 					// 	var other_user = USERS.get(user_id_in_class);
@@ -787,13 +789,13 @@ function mario(user_id){
 	            user.outgoingMedia.connect(faceOverlayFilter,function(error){
 	            	console.log(user.nickname+'connect to overlay');
 	            	if (error) {
-			        	console.error(error);
+			        	console.log(error);
 			        	return error;
 			        }
 			        faceOverlayFilter.connect(user.outgoingMedia,function(error){
 			        	console.log('overlay connect to '+user.nickname);
 			        	if (error) {
-				        	console.error(error);
+				        	console.log(error);
 				        	return error;
 				        }
 			        });
