@@ -772,8 +772,8 @@ function mario(user_id){
 	            Object.keys(room.user_ids).forEach(function(user_id_in_class){
 	            	console.log('m4');
 					if (USERS.get(user_id_in_class) && user_id_in_class != user_id) {
-						console.log(other_user.id+'connect to overlay');
 						var other_user = USERS.get(user_id_in_class);
+						console.log(other_user.id+'connect to overlay');
 						other_user.incomingMedia[user_id].connect(faceOverlayFilter,function(error){
 			            	if (error) {
 					        	console.log(error);
