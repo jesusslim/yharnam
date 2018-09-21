@@ -291,6 +291,7 @@ function WebRtcPeer(mode, options, callback) {
             remoteVideo.pause();
             var stream = pc.getRemoteStreams()[0];
             remoteVideo.srcObject = stream;
+            logger.debug(pc);
             logger.debug('Remote stream:', stream);
             remoteVideo.load();
         }
