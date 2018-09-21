@@ -769,38 +769,42 @@ function mario(user_id){
 	                return error;
 	            }
 	            console.log('m3');
-	    //         Object.keys(room.user_ids).forEach(function(user_id_in_class){
-					// if (USERS.get(user_id_in_class) && user_id_in_class != user_id) {
-					// 	var other_user = USERS.get(user_id_in_class);
-					// 	other_user.incomingMedia[user_id].connect(faceOverlayFilter,function(error){
-			  //           	if (error) {
-					//         	console.error(error);
-					//         	return error;
-					//         }
-					//         faceOverlayFilter.connect(other_user.incomingMedia[user_id],function(error){
-					//         	if (error) {
-					// 	        	console.error(error);
-					// 	        	return error;
-					// 	        }
-					//         });
-					//     });
-					// }
-	    //         });
-
-	            user.outgoingMedia.connect(faceOverlayFilter,function(error){
-	            	console.log(user.nickname+'connect to overlay');
-	            	if (error) {
-			        	console.log(error);
-			        	return error;
-			        }
-			        faceOverlayFilter.connect(user.outgoingMedia,function(error){
-			        	console.log('overlay connect to '+user.nickname);
-			        	if (error) {
-				        	console.log(error);
-				        	return error;
-				        }
-			        });
+	            Object.keys(room.user_ids).forEach(function(user_id_in_class){
+	            	console.log('m4');
+					if (USERS.get(user_id_in_class) && user_id_in_class != user_id) {
+						console.log(other_user.id+'connect to overlay');
+						var other_user = USERS.get(user_id_in_class);
+						other_user.incomingMedia[user_id].connect(faceOverlayFilter,function(error){
+			            	if (error) {
+					        	console.log(error);
+					        	return error;
+					        }
+					        console.log(user.nickname+'connect to overlay');
+					        faceOverlayFilter.connect(other_user.incomingMedia[user_id],function(error){
+					        	if (error) {
+						        	console.log(error);
+						        	return error;
+						        }
+						        console.log('overlay connect to '+other_user.id);
+					        });
+					    });
+					}
 	            });
+
+	          //   user.outgoingMedia.connect(faceOverlayFilter,function(error){
+	          //   	console.log(user.nickname+'connect to overlay');
+	          //   	if (error) {
+			        // 	console.log(error);
+			        // 	return error;
+			        // }
+			        // faceOverlayFilter.connect(user.outgoingMedia,function(error){
+			        // 	console.log('overlay connect to '+user.nickname);
+			        // 	if (error) {
+				       //  	console.log(error);
+				       //  	return error;
+				       //  }
+			        // });
+	          //   });
 	        }
 		)
 	});
