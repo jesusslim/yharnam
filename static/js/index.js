@@ -239,6 +239,13 @@ function call(user_id){
 			});
 		}
 	);
+
+	if (user_id != USER_ID) {
+		setInterval(function(){
+			console.log('==PEER OF '+user_id);
+			console.log(PEERS[user_id]);
+		},5000);
+	}
 }
 
 function callResp(msg){
