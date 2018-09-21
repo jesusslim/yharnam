@@ -3,7 +3,6 @@ var cookieParser = require('cookie-parser')
 var express = require('express');
 var session = require('express-session')
 var ws = require('ws');
-var minimist = require('minimist');
 var url = require('url');
 var kurento = require('kurento-client');
 var fs    = require('fs');
@@ -17,13 +16,6 @@ var config = require('./config/config.js');
 
 var redis_client = redis.createClient();
 const REDIS_EXPIRE = 3600;
-
-var argv = minimist(process.argv.slice(2), {
-  default: {
-      as_uri: "https://localhost:8443/",
-      ws_uri: "ws://localhost:8888/kurento"
-  }
-});
 
 var options =
 {
@@ -198,9 +190,9 @@ function getKurentoClient(callback){
 	if (KURENTO_CLIENT !== null) {
 		return callback(null,KURENTO_CLIENT);
 	}
-	kurento(argv.ws_uri, function(error, _kurentoClient) {
+	kurento(config.ws_uri, function(error, _kurentoClient) {
         if (error) {
-            var message = 'could not find media server at address ' + argv.ws_uri;
+            var message = 'could not find media server at address ' + config.ws_uri;
             return callback(message + ",error " + error);
         }
         KURENTO_CLIENT = _kurentoClient;
@@ -212,7 +204,7 @@ function getKurentoClient(callback){
 
 /**** SERVER ****/
 
-var as_url = url.parse(argv.as_uri);
+var as_url = url.parse(config.as_uri);
 var port = as_url.port;
 var server = https.createServer(options,app).listen(port,function(){
 	console.log('server start at '+url.format(as_url));
@@ -311,7 +303,7 @@ ws_server.on('connection',function(ws){
 			default:
 	            ws.send(JSON.stringify({
 	                id : 'error',
-	                message : 'Invalid message ' + message
+	                msg : 'Invalid message ' + message
 	            }));
             break;
 		}

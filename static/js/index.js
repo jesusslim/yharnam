@@ -73,6 +73,9 @@ ws.onmessage = function(message){
 		case 'someoneComein':
 			someoneComein(msg);
 			break;
+		case 'error':
+			alert(msg.msg);
+			break;
 		default:
 			console.error('Unrecognized message', msg);		
 	}
