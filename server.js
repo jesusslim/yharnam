@@ -310,6 +310,7 @@ ws_server.on('connection',function(ws){
 
             case 'mario':
             	var user_id = request.session.user_id;
+            	console.log('m0');
             	mario(user_id);
             	break;
 
