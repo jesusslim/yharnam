@@ -308,12 +308,6 @@ ws_server.on('connection',function(ws){
             	record(msg.class_id);
             	break;
 
-            case 'mario':
-            	var user_id = request.session.user_id;
-            	console.log('m0');
-            	mario(user_id);
-            	break;
-
 			default:
 	            ws.send(JSON.stringify({
 	                id : 'error',
@@ -749,65 +743,6 @@ function getYmd(){
 	if (month < 10) {month = '0'+month;}
 	if (day < 10) {day = '0'+day;}
 	return year+'-'+month+'-'+day;
-}
-
-function mario(user_id){
-	var user = USERS.get(user_id);
-	var room = CLASSROOM[user.class_id]
-	console.log('m1');
-	room.pipeline.create('FaceOverlayFilter', function(error, faceOverlayFilter) {
-        if (error) {
-        	console.log(error);
-        	return error;
-        }
-        console.log('m2');
-        faceOverlayFilter.setOverlayedImage(url.format(as_url) + 'img/mario-wings.png',
-            -0.35, -1.2, 1.6, 1.6, 
-            function(error) {
-	            if (error) {
-	            	console.log(error);
-	                return error;
-	            }
-	            console.log('m3');
-	            Object.keys(room.user_ids).forEach(function(user_id_in_class){
-	            	console.log('m4');
-					if (USERS.get(user_id_in_class) && user_id_in_class != user_id) {
-						var other_user = USERS.get(user_id_in_class);
-						console.log(other_user.id+'connect to overlay');
-						other_user.incomingMedia[user_id].connect(faceOverlayFilter,function(error){
-			            	if (error) {
-					        	console.log(error);
-					        	return error;
-					        }
-					        console.log(user.nickname+'connect to overlay');
-					        faceOverlayFilter.connect(other_user.incomingMedia[user_id],function(error){
-					        	if (error) {
-						        	console.log(error);
-						        	return error;
-						        }
-						        console.log('overlay connect to '+other_user.id);
-					        });
-					    });
-					}
-	            });
-
-	          //   user.outgoingMedia.connect(faceOverlayFilter,function(error){
-	          //   	console.log(user.nickname+'connect to overlay');
-	          //   	if (error) {
-			        // 	console.log(error);
-			        // 	return error;
-			        // }
-			        // faceOverlayFilter.connect(user.outgoingMedia,function(error){
-			        // 	console.log('overlay connect to '+user.nickname);
-			        // 	if (error) {
-				       //  	console.log(error);
-				       //  	return error;
-				       //  }
-			        // });
-	          //   });
-	        }
-		)
-	});
 }
 
 app.use(express.static(path.join(__dirname, 'static')));
