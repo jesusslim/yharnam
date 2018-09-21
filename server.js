@@ -765,18 +765,37 @@ function mario(user_id){
 	            	console.error(error);
 	                return error;
 	            }
-	            user.outgoingMedia.connect(faceOverlayFilter,function(error){
-	            	if (error) {
-			        	console.error(error);
-			        	return error;
-			        }
-			        faceOverlayFilter.connect(user.outgoingMedia,function(error){
-			        	if (error) {
-				        	console.error(error);
-				        	return error;
-				        }
-			        });
+
+	            Object.keys(room.user_ids).forEach(function(user_id_in_class){
+					if (USERS.get(user_id_in_class) && user_id_in_class != user_id) {
+						var other_user = USERS.get(user_id_in_class);
+						other_user.incomingMedia[user_id].connect(faceOverlayFilter,function(error){
+			            	if (error) {
+					        	console.error(error);
+					        	return error;
+					        }
+					        faceOverlayFilter.connect(other_user.incomingMedia[user_id],function(error){
+					        	if (error) {
+						        	console.error(error);
+						        	return error;
+						        }
+					        });
+					    });
+					}
 	            });
+
+	          //   user.outgoingMedia.connect(faceOverlayFilter,function(error){
+	          //   	if (error) {
+			        // 	console.error(error);
+			        // 	return error;
+			        // }
+			        // faceOverlayFilter.connect(user.outgoingMedia,function(error){
+			        // 	if (error) {
+				       //  	console.error(error);
+				       //  	return error;
+				       //  }
+			        // });
+	          //   });
 	        }
 		)
 	});
