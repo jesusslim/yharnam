@@ -276,6 +276,7 @@ ws_server.on('connection',function(ws){
 				//get sdp offer , answer
 				var user_id = request.session.user_id;
 				console.log(user_id + ' call:'+msg.user_id);
+				console.log(JSON.stringify(msg));
 				call(user_id,session_id, msg.class_id, msg.user_id,msg.sdp_offer);
             	break;
 
