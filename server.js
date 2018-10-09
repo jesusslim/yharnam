@@ -519,14 +519,16 @@ function getEndpointForUser(offer_owner_id,user_id,callback){
                 });
 
                 var remote_user = USERS.get(user_id);
-                remote_user.outgoingMedia.connect(incoming,function(error){
-                	if (error) {
-                        console.log(error);
-                        callback(error);
-                        return;
-                    }
-                    callback(null, incoming);
-                });
+               	if (remote_user) {
+	                remote_user.outgoingMedia.connect(incoming,function(error){
+	                	if (error) {
+	                        console.log(error);
+	                        callback(error);
+	                        return;
+	                    }
+	                    callback(null, incoming);
+	                });
+               	}
 			});
         });
     }
