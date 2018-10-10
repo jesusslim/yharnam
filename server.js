@@ -582,8 +582,10 @@ function leaveRoom(user_id){
 	Object.keys(room.user_ids).forEach(function(user_id_in_class){
 		if (USERS.get(user_id_in_class)) {
 			var other_user = USERS.get(user_id_in_class);
-			other_user.incomingMedia[user_id].release();
-			delete other_user.incomingMedia[user_id];
+			if (other_user.incomingMedia[user_id]) {
+				other_user.incomingMedia[user_id].release();
+				delete other_user.incomingMedia[user_id];
+			}
 			var message = {
 				id:'someoneLeave',
 				user_id:user_id,
